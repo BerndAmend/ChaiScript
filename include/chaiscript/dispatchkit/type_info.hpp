@@ -10,6 +10,7 @@
 #ifndef CHAISCRIPT_TYPE_INFO_HPP_
 #define CHAISCRIPT_TYPE_INFO_HPP_
 
+#include <cxxabi.h>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -81,6 +82,20 @@ namespace chaiscript {
       } else {
         return "";
       }
+    }
+
+    std::string demangled_name() const noexcept {
+      if (is_undef())
+        return "";
+
+      int status{};
+      char *ret = abi::__cxa_demangle(m_bare_type_info->name(), nullptr, nullptr, &status);
+      if (ret) {
+        std::string value{ret};
+        free(ret);
+        return value;
+      }
+      return m_bare_type_info->name();
     }
 
     constexpr const std::type_info *bare_type_info() const noexcept { return m_bare_type_info; }
